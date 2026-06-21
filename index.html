@@ -66,7 +66,7 @@
     background:#000;z-index:60;overflow:hidden;
   }
   #jumpscare-screen.fire{display:flex;animation:shake .09s infinite;}
-  #jumpscare-screen svg{width:min(96vw,96vh);height:min(96vw,96vh);}
+  #jumpscare-screen img{width:100%;height:100%;object-fit:cover;}
   #redflash{position:absolute;inset:0;background:#c0000088;mix-blend-mode:screen;animation:redflash .12s infinite;}
   @keyframes redflash{0%,100%{opacity:0;}50%{opacity:.6;}}
   @keyframes shake{
@@ -144,57 +144,8 @@
 
 <!-- 4) JUMP SCARE -->
 <div id="jumpscare-screen">
+  <img src="scare.jpg" alt="">
   <div id="redflash"></div>
-  <svg viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="skin" cx="50%" cy="56%" r="56%">
-        <stop offset="0%" stop-color="#dcd6cb"/>
-        <stop offset="50%" stop-color="#8d877d"/>
-        <stop offset="78%" stop-color="#1d1b18"/>
-        <stop offset="100%" stop-color="#000"/>
-      </radialGradient>
-    </defs>
-    <rect width="220" height="240" fill="#000"/>
-    <!-- 脸 -->
-    <ellipse cx="110" cy="126" rx="80" ry="102" fill="url(#skin)"/>
-    <!-- 眉骨阴影 -->
-    <ellipse cx="78" cy="90" rx="32" ry="20" fill="#000" opacity=".55"/>
-    <ellipse cx="142" cy="90" rx="32" ry="20" fill="#000" opacity=".55"/>
-    <!-- 深黑眼窝 -->
-    <ellipse cx="80" cy="100" rx="24" ry="18" fill="#040404"/>
-    <ellipse cx="140" cy="100" rx="24" ry="18" fill="#040404"/>
-    <!-- 瞪大的眼白 + 黑瞳 -->
-    <ellipse cx="82" cy="102" rx="13" ry="10.5" fill="#f3f0ea"/>
-    <ellipse cx="138" cy="102" rx="13" ry="10.5" fill="#f3f0ea"/>
-    <circle cx="86" cy="103" r="6" fill="#000"/>
-    <circle cx="134" cy="103" r="6" fill="#000"/>
-    <!-- 上眼睑压低（凶相）-->
-    <path d="M58 94 Q80 84 104 94 L104 99 Q80 90 58 100 Z" fill="#000" opacity=".5"/>
-    <path d="M116 94 Q140 84 162 94 L162 100 Q140 90 116 99 Z" fill="#000" opacity=".5"/>
-    <!-- 鼻 -->
-    <path d="M110 106 L100 150 Q110 157 120 150 Z" fill="#000" opacity=".32"/>
-    <ellipse cx="103" cy="150" rx="3.6" ry="5.4" fill="#000" opacity=".72"/>
-    <ellipse cx="117" cy="150" rx="3.6" ry="5.4" fill="#000" opacity=".72"/>
-    <!-- 大咧嘴（黑腔）-->
-    <path d="M60 170 Q110 146 160 170 Q138 208 110 209 Q82 208 60 170 Z" fill="#0a0807"/>
-    <!-- 上排牙（高低参差更瘆人）-->
-    <g fill="#e9e4d9">
-      <rect x="68"  y="166" width="11" height="17"/>
-      <rect x="81"  y="167" width="11" height="19"/>
-      <rect x="94"  y="166" width="11" height="16"/>
-      <rect x="107" y="167" width="11" height="20"/>
-      <rect x="120" y="166" width="11" height="17"/>
-      <rect x="133" y="167" width="11" height="18"/>
-    </g>
-    <!-- 下排牙 -->
-    <g fill="#d9d3c6">
-      <rect x="76"  y="193" width="10" height="13"/>
-      <rect x="88"  y="194" width="10" height="14"/>
-      <rect x="100" y="194" width="10" height="13"/>
-      <rect x="112" y="194" width="10" height="14"/>
-      <rect x="124" y="193" width="10" height="13"/>
-    </g>
-  </svg>
 </div>
 
 <!-- 5) 揭穿：paxtonchong -->
@@ -245,40 +196,69 @@ function fireScare(){
   js.classList.add('fire');     // 突然出现 + 剧烈抖动 + 红闪
   playScream();
 
-  setTimeout(() => {            // 吓 1.8 秒，砰一下揭穿
+  setTimeout(() => {            // 吓 2.6 秒（跟声音对齐），砰一下揭穿
     js.classList.remove('fire');
     js.style.display = 'none';
     document.getElementById('gotcha-screen').classList.add('show');
     confetti();
-  }, 1800);
+  }, 2600);
 }
 
-/* ---------- 实时合成一段刺耳尖叫（不靠任何外部音频文件）---------- */
+/* ---------- 实时合成一段「人在尖叫」的吼声（不靠任何外部音频文件）---------- */
 function playScream(){
   if(!audio) return;
-  const t0 = audio.currentTime, dur = 1.7;
+  const t0 = audio.currentTime, dur = 2.7;   // 拉长到 2.7 秒
+
   const master = audio.createGain();
   master.gain.setValueAtTime(0.0001, t0);
-  master.gain.exponentialRampToValueAtTime(0.9, t0 + 0.02);   // 突然炸响
-  master.gain.setValueAtTime(0.9, t0 + dur - 0.25);
+  master.gain.exponentialRampToValueAtTime(1.0, t0 + 0.03);   // 瞬间炸响
+  master.gain.setValueAtTime(1.0, t0 + dur - 0.45);
   master.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   master.connect(audio.destination);
 
-  // 几个失谐的高频锯齿波 = 尖叫感，还往上滑更刺耳
-  [196, 208, 247, 392, 415].forEach(f => {
-    const o = audio.createOscillator(); o.type = 'sawtooth';
-    o.frequency.setValueAtTime(f * 2, t0);
-    o.frequency.exponentialRampToValueAtTime(f * 3.4, t0 + dur);
-    const g = audio.createGain(); g.gain.value = 0.14;
-    o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + dur);
+  // 轻微过载 → "喊到破音、撕裂"的质感
+  const shaper = audio.createWaveShaper();
+  const curve = new Float32Array(256);
+  for(let i=0;i<256;i++){ const x=i/128-1; curve[i]=Math.tanh(x*3); }
+  shaper.curve = curve; shaper.connect(master);
+
+  // 共振峰：把声音塑造成人声「啊——」的元音（这是它像"人喊"的关键）
+  function formant(freq, q, gain){
+    const f = audio.createBiquadFilter();
+    f.type='bandpass'; f.frequency.value=freq; f.Q.value=q;
+    const g = audio.createGain(); g.gain.value=gain;
+    f.connect(g); g.connect(shaper);
+    return f;
+  }
+  const f1=formant(820,8,1.0), f2=formant(1180,9,0.8), f3=formant(2700,10,0.5);
+
+  // 颤音（真人喊叫时声音会抖）
+  const lfo=audio.createOscillator(); lfo.frequency.value=6.5;
+  const lfoGain=audio.createGain(); lfoGain.gain.value=40;
+  lfo.connect(lfoGain); lfo.start(t0); lfo.stop(t0+dur);
+
+  // "声带"：两条略微失谐的锯齿波 + 喊叫的音高起伏
+  [0, 8].forEach(det => {
+    const o=audio.createOscillator(); o.type='sawtooth'; o.detune.value=det;
+    o.frequency.setValueAtTime(480, t0);
+    o.frequency.linearRampToValueAtTime(960, t0+0.18);  // 猛地喊起来
+    o.frequency.linearRampToValueAtTime(760, t0+1.4);   // 中段起伏
+    o.frequency.linearRampToValueAtTime(880, t0+2.1);
+    o.frequency.linearRampToValueAtTime(400, t0+dur);   // 尾段下滑（喊到没气）
+    lfoGain.connect(o.frequency);
+    o.connect(f1); o.connect(f2); o.connect(f3);
+    o.start(t0); o.stop(t0+dur);
   });
-  // 白噪音 = 嘶吼
-  const buf = audio.createBuffer(1, audio.sampleRate * dur, audio.sampleRate);
-  const d = buf.getChannelData(0);
-  for(let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.5;
-  const noise = audio.createBufferSource(); noise.buffer = buf;
-  const ng = audio.createGain(); ng.gain.value = 0.32;
-  noise.connect(ng); ng.connect(master); noise.start(t0); noise.stop(t0 + dur);
+
+  // 嘶哑的气声
+  const buf=audio.createBuffer(1, audio.sampleRate*dur, audio.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  const noise=audio.createBufferSource(); noise.buffer=buf;
+  const nbp=audio.createBiquadFilter(); nbp.type='bandpass'; nbp.frequency.value=1500; nbp.Q.value=0.7;
+  const ng=audio.createGain(); ng.gain.value=0.22;
+  noise.connect(nbp); nbp.connect(ng); ng.connect(shaper);
+  noise.start(t0); noise.stop(t0+dur);
 }
 
 /* ---------- 彩屑庆祝 ---------- */
