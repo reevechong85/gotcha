@@ -119,8 +119,8 @@
   <div class="field"><label>Your pet's name (real or imaginary) 🐶</label><input type="text" placeholder="Fluffy?"></div>
 
   <div class="btns">
-    <button class="btn submit" onclick="openConfirm()">Submit ✅</button>
-    <button class="btn cancel" onclick="openConfirm()">Cancel ❌</button>
+    <button class="btn submit" onclick="openConfirm('submit')">Submit ✅</button>
+    <button class="btn cancel" onclick="openConfirm('cancel')">Cancel ❌</button>
   </div>
   <div class="psst">😜 psst… nothing here is real or saved</div>
 </div>
@@ -128,9 +128,9 @@
 <!-- 2) 确认弹窗 -->
 <div id="confirm-modal">
   <div class="modal-card">
-    <div class="q">🤔</div>
-    <h2>Is this information correct?</h2>
-    <p>Double-check before we continue…</p>
+    <div class="q" id="confirm-q">🤔</div>
+    <h2 id="confirm-title">Is this information correct?</h2>
+    <p id="confirm-sub">Double-check before we continue…</p>
     <div class="modal-btns">
       <button class="btn submit" onclick="afterConfirm()">Yes ✅</button>
       <button class="btn cancel" onclick="afterConfirm()">No ❌</button>
@@ -174,7 +174,19 @@
 
 let audio = null;   // 在用户点击（手势）时创建，浏览器才允许出声
 
-function openConfirm(){
+function openConfirm(type){
+  const q = document.getElementById('confirm-q');
+  const h = document.getElementById('confirm-title');
+  const p = document.getElementById('confirm-sub');
+  if(type === 'cancel'){              // 按了 Cancel → 问"确定要取消吗"
+    q.textContent = '🚫';
+    h.textContent = 'Are you sure you want to cancel?';
+    p.textContent = "You can't undo this…";
+  } else {                            // 按了 Submit → 问"资料正确吗"
+    q.textContent = '🤔';
+    h.textContent = 'Is this information correct?';
+    p.textContent = 'Double-check before we continue…';
+  }
   document.getElementById('confirm-modal').classList.add('show');
 }
 
