@@ -15,8 +15,7 @@
   /* ---------- 1) 假装的"填资料"卡片 ---------- */
   #form-screen{
     background:#fff;border-radius:20px;padding:30px 26px;max-width:380px;width:100%;
-    box-shadow:0 24px 60px rgba(0,0,0,.45);text-align:center;
-    animation:pop .35s ease;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);text-align:center;animation:pop .35s ease;
   }
   @keyframes pop{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
   #form-screen .lock{font-size:44px;}
@@ -36,21 +35,49 @@
   .cancel{background:#ef4444;color:#fff;box-shadow:0 6px 16px rgba(239,68,68,.4);}
   .psst{margin-top:14px;font-size:11px;color:#aab3c5;}
 
-  /* ---------- 2) 黑客吓人画面 ---------- */
-  #hack-screen{
+  /* ---------- 2) 确认弹窗 ---------- */
+  #confirm-modal{
     position:fixed;inset:0;display:none;align-items:center;justify-content:center;
-    background:#000;z-index:30;overflow:hidden;
+    background:rgba(8,12,24,.65);backdrop-filter:blur(3px);z-index:25;
   }
-  #matrix{position:absolute;inset:0;}
-  #hack-text{
-    position:relative;z-index:2;color:#22ff66;font-family:"Courier New",monospace;
-    text-align:center;text-shadow:0 0 12px #22ff66;padding:20px;
+  #confirm-modal.show{display:flex;}
+  .modal-card{
+    background:#fff;border-radius:18px;padding:26px 24px;max-width:330px;width:90%;text-align:center;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);animation:pop .25s ease;
   }
-  #hack-text .big{font-size:clamp(26px,7vw,44px);font-weight:900;letter-spacing:2px;animation:flicker .6s infinite;}
-  #hack-text .line{font-size:clamp(14px,3.6vw,20px);margin-top:14px;opacity:.95;}
-  @keyframes flicker{0%,100%{opacity:1;}50%{opacity:.45;}}
+  .modal-card .q{font-size:40px;}
+  .modal-card h2{font-size:18px;color:#1f2a44;margin:8px 0 6px;}
+  .modal-card p{font-size:14px;color:#7a869a;margin-bottom:18px;}
+  .modal-btns{display:flex;gap:10px;}
 
-  /* ---------- 3) 揭穿：哈哈整蛊你 ---------- */
+  /* ---------- 3) 假装验证（让人松懈一下）---------- */
+  #verify-screen{
+    position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+    background:#0d1424;color:#cfe0ff;z-index:35;gap:14px;
+  }
+  #verify-screen.show{display:flex;}
+  .spinner{width:46px;height:46px;border:5px solid rgba(255,255,255,.2);border-top-color:#5C9DFF;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #verify-screen .vtext{font-size:16px;}
+
+  /* ---------- 4) JUMP SCARE 😱 ---------- */
+  #jumpscare-screen{
+    position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:#000;z-index:60;overflow:hidden;
+  }
+  #jumpscare-screen.fire{display:flex;animation:shake .09s infinite;}
+  #jumpscare-screen svg{width:min(96vw,96vh);height:min(96vw,96vh);}
+  #redflash{position:absolute;inset:0;background:#c0000088;mix-blend-mode:screen;animation:redflash .12s infinite;}
+  @keyframes redflash{0%,100%{opacity:0;}50%{opacity:.6;}}
+  @keyframes shake{
+    0%{transform:translate(0,0) scale(1.04);}
+    25%{transform:translate(-10px,8px) scale(1.07);}
+    50%{transform:translate(9px,-9px) scale(1.03);}
+    75%{transform:translate(-7px,-6px) scale(1.08);}
+    100%{transform:translate(8px,7px) scale(1.04);}
+  }
+
+  /* ---------- 5) 揭穿：paxtonchong ---------- */
   #gotcha-screen{
     position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:24px;z-index:40;color:#fff;
@@ -59,7 +86,7 @@
   #gotcha-screen.show{display:flex;animation:pop .4s ease;}
   #gotcha-screen .emoji{font-size:clamp(60px,16vw,110px);animation:wob 1s ease-in-out infinite;}
   @keyframes wob{0%,100%{transform:rotate(-8deg);}50%{transform:rotate(8deg);}}
-  #gotcha-screen h1{font-size:clamp(34px,9vw,64px);margin:4px 0;text-shadow:0 4px 0 rgba(0,0,0,.18);}
+  #gotcha-screen h1{font-size:clamp(34px,9vw,60px);margin:4px 0;text-shadow:0 4px 0 rgba(0,0,0,.18);word-break:break-all;}
   #gotcha-screen .p{font-size:clamp(16px,4vw,22px);font-weight:700;margin-bottom:6px;}
   #gotcha-screen .safe{font-size:14px;opacity:.92;margin-bottom:22px;}
   .lesson{
@@ -90,28 +117,91 @@
   <div class="field"><label>Your pet's name (real or imaginary) 🐶</label><input type="text" placeholder="Fluffy?"></div>
 
   <div class="btns">
-    <button class="btn submit" onclick="runPrank()">Submit ✅</button>
-    <button class="btn cancel" onclick="runPrank()">Cancel ❌</button>
+    <button class="btn submit" onclick="openConfirm()">Submit ✅</button>
+    <button class="btn cancel" onclick="openConfirm()">Cancel ❌</button>
   </div>
   <div class="psst">😜 psst… nothing here is real or saved</div>
 </div>
 
-<!-- 2) 黑客吓人画面 -->
-<div id="hack-screen">
-  <canvas id="matrix"></canvas>
-  <div id="hack-text">
-    <div class="big">❌ CANCEL DENIED</div>
-    <div class="line">💀 HACKING IN PROGRESS… 💀</div>
-    <div class="line">&gt;&gt;&gt; Accessing Paxton's files…</div>
-    <div class="line" style="font-size:1.3em;font-weight:900;margin-top:18px;">Paxton has been HACKED! 😈</div>
+<!-- 2) 确认弹窗 -->
+<div id="confirm-modal">
+  <div class="modal-card">
+    <div class="q">🤔</div>
+    <h2>Is this information correct?</h2>
+    <p>Double-check before we continue…</p>
+    <div class="modal-btns">
+      <button class="btn submit" onclick="afterConfirm()">Yes ✅</button>
+      <button class="btn cancel" onclick="afterConfirm()">No ❌</button>
+    </div>
   </div>
 </div>
 
-<!-- 3) 揭穿：哈哈整蛊你 -->
+<!-- 3) 假装验证 -->
+<div id="verify-screen">
+  <div class="spinner"></div>
+  <div class="vtext" id="vtext">Verifying your information…</div>
+</div>
+
+<!-- 4) JUMP SCARE -->
+<div id="jumpscare-screen">
+  <div id="redflash"></div>
+  <svg viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="skin" cx="50%" cy="56%" r="56%">
+        <stop offset="0%" stop-color="#dcd6cb"/>
+        <stop offset="50%" stop-color="#8d877d"/>
+        <stop offset="78%" stop-color="#1d1b18"/>
+        <stop offset="100%" stop-color="#000"/>
+      </radialGradient>
+    </defs>
+    <rect width="220" height="240" fill="#000"/>
+    <!-- 脸 -->
+    <ellipse cx="110" cy="126" rx="80" ry="102" fill="url(#skin)"/>
+    <!-- 眉骨阴影 -->
+    <ellipse cx="78" cy="90" rx="32" ry="20" fill="#000" opacity=".55"/>
+    <ellipse cx="142" cy="90" rx="32" ry="20" fill="#000" opacity=".55"/>
+    <!-- 深黑眼窝 -->
+    <ellipse cx="80" cy="100" rx="24" ry="18" fill="#040404"/>
+    <ellipse cx="140" cy="100" rx="24" ry="18" fill="#040404"/>
+    <!-- 瞪大的眼白 + 黑瞳 -->
+    <ellipse cx="82" cy="102" rx="13" ry="10.5" fill="#f3f0ea"/>
+    <ellipse cx="138" cy="102" rx="13" ry="10.5" fill="#f3f0ea"/>
+    <circle cx="86" cy="103" r="6" fill="#000"/>
+    <circle cx="134" cy="103" r="6" fill="#000"/>
+    <!-- 上眼睑压低（凶相）-->
+    <path d="M58 94 Q80 84 104 94 L104 99 Q80 90 58 100 Z" fill="#000" opacity=".5"/>
+    <path d="M116 94 Q140 84 162 94 L162 100 Q140 90 116 99 Z" fill="#000" opacity=".5"/>
+    <!-- 鼻 -->
+    <path d="M110 106 L100 150 Q110 157 120 150 Z" fill="#000" opacity=".32"/>
+    <ellipse cx="103" cy="150" rx="3.6" ry="5.4" fill="#000" opacity=".72"/>
+    <ellipse cx="117" cy="150" rx="3.6" ry="5.4" fill="#000" opacity=".72"/>
+    <!-- 大咧嘴（黑腔）-->
+    <path d="M60 170 Q110 146 160 170 Q138 208 110 209 Q82 208 60 170 Z" fill="#0a0807"/>
+    <!-- 上排牙（高低参差更瘆人）-->
+    <g fill="#e9e4d9">
+      <rect x="68"  y="166" width="11" height="17"/>
+      <rect x="81"  y="167" width="11" height="19"/>
+      <rect x="94"  y="166" width="11" height="16"/>
+      <rect x="107" y="167" width="11" height="20"/>
+      <rect x="120" y="166" width="11" height="17"/>
+      <rect x="133" y="167" width="11" height="18"/>
+    </g>
+    <!-- 下排牙 -->
+    <g fill="#d9d3c6">
+      <rect x="76"  y="193" width="10" height="13"/>
+      <rect x="88"  y="194" width="10" height="14"/>
+      <rect x="100" y="194" width="10" height="13"/>
+      <rect x="112" y="194" width="10" height="14"/>
+      <rect x="124" y="193" width="10" height="13"/>
+    </g>
+  </svg>
+</div>
+
+<!-- 5) 揭穿：paxtonchong -->
 <div id="gotcha-screen">
   <div class="emoji">😜</div>
-  <h1>GOTCHA!</h1>
-  <div class="p">It's just a PRANK! 🎉</div>
+  <h1>paxtonchong</h1>
+  <div class="p">GOT YOU! 😈 It's just a prank 🎉</div>
   <div class="safe">Nothing was hacked. Nothing was saved. You're totally fine 😄</div>
   <div class="lesson">
     <b>🛡️ Remember:</b><br>
@@ -125,48 +215,71 @@
 
 <script>
 /* ============================================================
-   安全整蛊：填资料 → 按钮 → 假装黑客吓一跳 → 砰，揭穿是玩笑
-   重点：输入框什么都不收集、不发送（下面没有任何提交逻辑）
+   安全整蛊 v2：填资料 → 确认弹窗 → jump scare（脸+尖叫）→ 揭穿
+   底线不变：输入框什么都不收集、不发送（全篇没有任何提交逻辑）
    ============================================================ */
 
-function runPrank(){
-  document.getElementById('form-screen').style.display = 'none';
-  const hack = document.getElementById('hack-screen');
-  hack.style.display = 'flex';
-  startMatrix();
+let audio = null;   // 在用户点击（手势）时创建，浏览器才允许出声
 
-  // 吓 2 秒，然后砰一下揭穿
-  setTimeout(() => {
-    hack.style.display = 'none';
-    stopMatrix();
+function openConfirm(){
+  document.getElementById('confirm-modal').classList.add('show');
+}
+
+function afterConfirm(){
+  // 在这次点击（手势）里先把音频引擎准备好
+  try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); audio.resume(); }catch(e){}
+
+  document.getElementById('confirm-modal').classList.remove('show');
+  document.getElementById('form-screen').style.display = 'none';
+
+  // 假装验证 → 让人松懈，jump scare 才够突然
+  const v = document.getElementById('verify-screen');
+  v.classList.add('show');
+  setTimeout(() => document.getElementById('vtext').textContent = '✅ Looks good! Almost done…', 650);
+  setTimeout(fireScare, 1100);
+}
+
+function fireScare(){
+  document.getElementById('verify-screen').classList.remove('show');
+  const js = document.getElementById('jumpscare-screen');
+  js.classList.add('fire');     // 突然出现 + 剧烈抖动 + 红闪
+  playScream();
+
+  setTimeout(() => {            // 吓 1.8 秒，砰一下揭穿
+    js.classList.remove('fire');
+    js.style.display = 'none';
     document.getElementById('gotcha-screen').classList.add('show');
     confetti();
-  }, 2200);
+  }, 1800);
 }
 
-/* ---------- 绿色代码雨（Matrix 效果）---------- */
-const mcv = document.getElementById('matrix');
-const mctx = mcv.getContext('2d');
-let drops = [], matrixTimer = null;
-const CH = "01アイウカキ#@%&".split('');
+/* ---------- 实时合成一段刺耳尖叫（不靠任何外部音频文件）---------- */
+function playScream(){
+  if(!audio) return;
+  const t0 = audio.currentTime, dur = 1.7;
+  const master = audio.createGain();
+  master.gain.setValueAtTime(0.0001, t0);
+  master.gain.exponentialRampToValueAtTime(0.9, t0 + 0.02);   // 突然炸响
+  master.gain.setValueAtTime(0.9, t0 + dur - 0.25);
+  master.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  master.connect(audio.destination);
 
-function startMatrix(){
-  mcv.width = innerWidth; mcv.height = innerHeight;
-  const cols = Math.floor(mcv.width / 16);
-  drops = Array(cols).fill(0).map(() => Math.random() * mcv.height);
-  clearInterval(matrixTimer);
-  matrixTimer = setInterval(() => {
-    mctx.fillStyle = 'rgba(0,0,0,.08)';
-    mctx.fillRect(0, 0, mcv.width, mcv.height);
-    mctx.fillStyle = '#22ff66';
-    mctx.font = '15px monospace';
-    drops.forEach((y, i) => {
-      mctx.fillText(CH[Math.floor(Math.random()*CH.length)], i*16, y);
-      drops[i] = (y > mcv.height && Math.random() > .975) ? 0 : y + 16;
-    });
-  }, 50);
+  // 几个失谐的高频锯齿波 = 尖叫感，还往上滑更刺耳
+  [196, 208, 247, 392, 415].forEach(f => {
+    const o = audio.createOscillator(); o.type = 'sawtooth';
+    o.frequency.setValueAtTime(f * 2, t0);
+    o.frequency.exponentialRampToValueAtTime(f * 3.4, t0 + dur);
+    const g = audio.createGain(); g.gain.value = 0.14;
+    o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + dur);
+  });
+  // 白噪音 = 嘶吼
+  const buf = audio.createBuffer(1, audio.sampleRate * dur, audio.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.5;
+  const noise = audio.createBufferSource(); noise.buffer = buf;
+  const ng = audio.createGain(); ng.gain.value = 0.32;
+  noise.connect(ng); ng.connect(master); noise.start(t0); noise.stop(t0 + dur);
 }
-function stopMatrix(){ clearInterval(matrixTimer); mctx.clearRect(0,0,mcv.width,mcv.height); }
 
 /* ---------- 彩屑庆祝 ---------- */
 const cv = document.getElementById('confetti');
@@ -176,7 +289,7 @@ rs(); addEventListener('resize', rs);
 function confetti(){
   const colors = ['#fff','#fde047','#fb7185','#34d399','#60a5fa','#c084fc'];
   const bits = [];
-  for(let i=0;i<160;i++){
+  for(let i = 0; i < 160; i++){
     bits.push({ x:innerWidth/2, y:innerHeight/2,
       vx:(Math.random()-.5)*16, vy:(Math.random()-.5)*16-5,
       r:Math.random()*7+4, c:colors[i%colors.length],
