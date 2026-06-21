@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔒 Security Check</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Segoe UI",system-ui,sans-serif;}
+  html,body{height:100%;}
+  body{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(160deg,#1f2a44,#0d1424);overflow:hidden;
+  }
+
+  /* ---------- 1) 假装的"填资料"卡片 ---------- */
+  #form-screen{
+    background:#fff;border-radius:20px;padding:30px 26px;max-width:380px;width:100%;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);text-align:center;
+    animation:pop .35s ease;
+  }
+  @keyframes pop{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+  #form-screen .lock{font-size:44px;}
+  #form-screen h1{font-size:21px;color:#1f2a44;margin:6px 0 4px;}
+  #form-screen .desc{color:#7a869a;font-size:14px;margin-bottom:18px;}
+  .field{text-align:left;margin-bottom:12px;}
+  .field label{font-size:13px;color:#48526b;font-weight:600;display:block;margin-bottom:5px;}
+  .field input{
+    width:100%;padding:11px 13px;border:2px solid #e2e7f0;border-radius:11px;font-size:15px;
+    transition:.15s;background:#f8fafc;
+  }
+  .field input:focus{outline:none;border-color:#5C9DFF;background:#fff;}
+  .btns{display:flex;gap:10px;margin-top:18px;}
+  .btn{flex:1;border:none;cursor:pointer;padding:13px;border-radius:12px;font-size:15px;font-weight:800;transition:.15s;}
+  .btn:active{transform:scale(.96);}
+  .submit{background:#22c55e;color:#fff;box-shadow:0 6px 16px rgba(34,197,94,.4);}
+  .cancel{background:#ef4444;color:#fff;box-shadow:0 6px 16px rgba(239,68,68,.4);}
+  .psst{margin-top:14px;font-size:11px;color:#aab3c5;}
+
+  /* ---------- 2) 黑客吓人画面 ---------- */
+  #hack-screen{
+    position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:#000;z-index:30;overflow:hidden;
+  }
+  #matrix{position:absolute;inset:0;}
+  #hack-text{
+    position:relative;z-index:2;color:#22ff66;font-family:"Courier New",monospace;
+    text-align:center;text-shadow:0 0 12px #22ff66;padding:20px;
+  }
+  #hack-text .big{font-size:clamp(26px,7vw,44px);font-weight:900;letter-spacing:2px;animation:flicker .6s infinite;}
+  #hack-text .line{font-size:clamp(14px,3.6vw,20px);margin-top:14px;opacity:.95;}
+  @keyframes flicker{0%,100%{opacity:1;}50%{opacity:.45;}}
+
+  /* ---------- 3) 揭穿：哈哈整蛊你 ---------- */
+  #gotcha-screen{
+    position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;z-index:40;color:#fff;
+    background:linear-gradient(160deg,#7c3aed,#ec4899,#f59e0b);
+  }
+  #gotcha-screen.show{display:flex;animation:pop .4s ease;}
+  #gotcha-screen .emoji{font-size:clamp(60px,16vw,110px);animation:wob 1s ease-in-out infinite;}
+  @keyframes wob{0%,100%{transform:rotate(-8deg);}50%{transform:rotate(8deg);}}
+  #gotcha-screen h1{font-size:clamp(34px,9vw,64px);margin:4px 0;text-shadow:0 4px 0 rgba(0,0,0,.18);}
+  #gotcha-screen .p{font-size:clamp(16px,4vw,22px);font-weight:700;margin-bottom:6px;}
+  #gotcha-screen .safe{font-size:14px;opacity:.92;margin-bottom:22px;}
+  .lesson{
+    background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border-radius:16px;
+    padding:16px 20px;max-width:440px;font-size:14.5px;line-height:1.55;margin-bottom:24px;
+    border:1px solid rgba(255,255,255,.3);
+  }
+  .lesson b{font-size:16px;}
+  .again{
+    background:#fff;color:#7c3aed;border:none;cursor:pointer;font-size:16px;font-weight:800;
+    padding:14px 28px;border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.3);
+  }
+  .again:active{transform:scale(.96);}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:50;}
+</style>
+</head>
+<body>
+
+<!-- 1) 假装要你填资料（输入框纯摆设，什么都不存、不发）-->
+<div id="form-screen">
+  <div class="lock">🔒</div>
+  <h1>Super Official Security Check</h1>
+  <div class="desc">Please enter your top-secret info to continue:</div>
+
+  <div class="field"><label>Your name</label><input type="text" placeholder="Type your name..."></div>
+  <div class="field"><label>Your favorite snack 🍪</label><input type="text" placeholder="Cookies? Chips?"></div>
+  <div class="field"><label>Your secret superhero name 🦸</label><input type="text" placeholder="Captain...?"></div>
+  <div class="field"><label>Your pet's name (real or imaginary) 🐶</label><input type="text" placeholder="Fluffy?"></div>
+
+  <div class="btns">
+    <button class="btn submit" onclick="runPrank()">Submit ✅</button>
+    <button class="btn cancel" onclick="runPrank()">Cancel ❌</button>
+  </div>
+  <div class="psst">😜 psst… nothing here is real or saved</div>
+</div>
+
+<!-- 2) 黑客吓人画面 -->
+<div id="hack-screen">
+  <canvas id="matrix"></canvas>
+  <div id="hack-text">
+    <div class="big">❌ CANCEL DENIED</div>
+    <div class="line">💀 HACKING IN PROGRESS… 💀</div>
+    <div class="line">&gt;&gt;&gt; Accessing Paxton's files…</div>
+    <div class="line" style="font-size:1.3em;font-weight:900;margin-top:18px;">Paxton has been HACKED! 😈</div>
+  </div>
+</div>
+
+<!-- 3) 揭穿：哈哈整蛊你 -->
+<div id="gotcha-screen">
+  <div class="emoji">😜</div>
+  <h1>GOTCHA!</h1>
+  <div class="p">It's just a PRANK! 🎉</div>
+  <div class="safe">Nothing was hacked. Nothing was saved. You're totally fine 😄</div>
+  <div class="lesson">
+    <b>🛡️ Remember:</b><br>
+    Real websites <b>NEVER</b> scare you into typing your info.<br>
+    If a page tries to frighten you or asks for secret stuff — <b>close it. It's a trick!</b>
+  </div>
+  <button class="again" onclick="location.reload()">🔁 Prank someone else</button>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ============================================================
+   安全整蛊：填资料 → 按钮 → 假装黑客吓一跳 → 砰，揭穿是玩笑
+   重点：输入框什么都不收集、不发送（下面没有任何提交逻辑）
+   ============================================================ */
+
+function runPrank(){
+  document.getElementById('form-screen').style.display = 'none';
+  const hack = document.getElementById('hack-screen');
+  hack.style.display = 'flex';
+  startMatrix();
+
+  // 吓 2 秒，然后砰一下揭穿
+  setTimeout(() => {
+    hack.style.display = 'none';
+    stopMatrix();
+    document.getElementById('gotcha-screen').classList.add('show');
+    confetti();
+  }, 2200);
+}
+
+/* ---------- 绿色代码雨（Matrix 效果）---------- */
+const mcv = document.getElementById('matrix');
+const mctx = mcv.getContext('2d');
+let drops = [], matrixTimer = null;
+const CH = "01アイウカキ#@%&".split('');
+
+function startMatrix(){
+  mcv.width = innerWidth; mcv.height = innerHeight;
+  const cols = Math.floor(mcv.width / 16);
+  drops = Array(cols).fill(0).map(() => Math.random() * mcv.height);
+  clearInterval(matrixTimer);
+  matrixTimer = setInterval(() => {
+    mctx.fillStyle = 'rgba(0,0,0,.08)';
+    mctx.fillRect(0, 0, mcv.width, mcv.height);
+    mctx.fillStyle = '#22ff66';
+    mctx.font = '15px monospace';
+    drops.forEach((y, i) => {
+      mctx.fillText(CH[Math.floor(Math.random()*CH.length)], i*16, y);
+      drops[i] = (y > mcv.height && Math.random() > .975) ? 0 : y + 16;
+    });
+  }, 50);
+}
+function stopMatrix(){ clearInterval(matrixTimer); mctx.clearRect(0,0,mcv.width,mcv.height); }
+
+/* ---------- 彩屑庆祝 ---------- */
+const cv = document.getElementById('confetti');
+const ctx = cv.getContext('2d');
+function rs(){ cv.width = innerWidth; cv.height = innerHeight; }
+rs(); addEventListener('resize', rs);
+function confetti(){
+  const colors = ['#fff','#fde047','#fb7185','#34d399','#60a5fa','#c084fc'];
+  const bits = [];
+  for(let i=0;i<160;i++){
+    bits.push({ x:innerWidth/2, y:innerHeight/2,
+      vx:(Math.random()-.5)*16, vy:(Math.random()-.5)*16-5,
+      r:Math.random()*7+4, c:colors[i%colors.length],
+      rot:Math.random()*360, vr:(Math.random()-.5)*22 });
+  }
+  let f = 0;
+  (function run(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    f++;
+    bits.forEach(b => {
+      b.vy += .4; b.x += b.vx; b.y += b.vy; b.rot += b.vr;
+      ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.rot*Math.PI/180);
+      ctx.fillStyle = b.c; ctx.fillRect(-b.r/2,-b.r/2,b.r,b.r*.6); ctx.restore();
+    });
+    if(f < 160) requestAnimationFrame(run);
+  })();
+}
+</script>
+</body>
+</html>
