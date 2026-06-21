@@ -19,7 +19,7 @@
   }
   @keyframes pop{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
   #form-screen .lock{font-size:44px;}
-  #form-screen h1{font-size:21px;color:#1f2a44;margin:6px 0 4px;}
+  #form-screen h1{font-size:23px;color:#16a34a;margin:6px 0 4px;font-weight:900;}
   #form-screen .desc{color:#7a869a;font-size:14px;margin-bottom:18px;}
   .field{text-align:left;margin-bottom:12px;}
   .field label{font-size:13px;color:#48526b;font-weight:600;display:block;margin-bottom:5px;}
@@ -109,17 +109,17 @@
 
 <!-- 1) 假装要你填资料（输入框纯摆设，什么都不存、不发）-->
 <div id="form-screen">
-  <div class="lock">🔒</div>
-  <h1>Super Official Security Check</h1>
-  <div class="desc">Please enter your top-secret info to continue:</div>
+  <div class="lock">🎁</div>
+  <h1>🎉 FREE ROBUX REWARD 🎉</h1>
+  <div class="desc">🎮 You've been picked! Claim your free Robux below:</div>
 
-  <div class="field"><label>Your name</label><input type="text" placeholder="Type your name..."></div>
-  <div class="field"><label>Your favorite snack 🍪</label><input type="text" placeholder="Cookies? Chips?"></div>
-  <div class="field"><label>Your secret superhero name 🦸</label><input type="text" placeholder="Captain...?"></div>
-  <div class="field"><label>Your pet's name (real or imaginary) 🐶</label><input type="text" placeholder="Fluffy?"></div>
+  <div class="field"><label>Your player name 🎮</label><input type="text" placeholder="Your username..."></div>
+  <div class="field"><label>How much Robux do you want? 💎</label><input type="text" placeholder="10,000? 1 Million?!"></div>
+  <div class="field"><label>Your favorite game 🎲</label><input type="text" placeholder="Adopt Me? Brookhaven?"></div>
+  <div class="field"><label>Your lucky number 🍀</label><input type="text" placeholder="7? 777?"></div>
 
   <div class="btns">
-    <button class="btn submit" onclick="openConfirm('submit')">Submit ✅</button>
+    <button class="btn submit" onclick="openConfirm('submit')">🎁 Claim Reward</button>
     <button class="btn cancel" onclick="openConfirm('cancel')">Cancel ❌</button>
   </div>
   <div class="psst">😜 psst… nothing here is real or saved</div>
@@ -196,8 +196,8 @@ function openConfirm(type){
     p.textContent = "You can't undo this…";
   } else {                            // 按了 Submit → 问"资料正确吗"
     q.textContent = '🤔';
-    h.textContent = 'Is this information correct?';
-    p.textContent = 'Double-check before we continue…';
+    h.textContent = 'Claim your reward now?';
+    p.textContent = 'Make sure everything looks right…';
   }
   document.getElementById('confirm-modal').classList.add('show');
 }
