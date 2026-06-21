@@ -175,6 +175,7 @@
 let audio = null;   // 在用户点击（手势）时创建，浏览器才允许出声
 
 function openConfirm(type){
+  unlockAudio();                     // 第一次点按钮就解锁声音（手机关键）
   const q = document.getElementById('confirm-q');
   const h = document.getElementById('confirm-title');
   const p = document.getElementById('confirm-sub');
@@ -191,8 +192,7 @@ function openConfirm(type){
 }
 
 function afterConfirm(){
-  // 在这次点击（手势）里先把音频引擎准备好
-  try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); audio.resume(); }catch(e){}
+  unlockAudio();                     // 再确保一次声音已解锁
 
   document.getElementById('confirm-modal').classList.remove('show');
   document.getElementById('form-screen').style.display = 'none';
