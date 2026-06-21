@@ -172,7 +172,24 @@
    底线不变：输入框什么都不收集、不发送（全篇没有任何提交逻辑）
    ============================================================ */
 
-let audio = null;   // 在用户点击（手势）时创建，浏览器才允许出声
+let audio = null, silentEl = null;   // 在用户点击（手势）时创建/解锁，浏览器（尤其手机）才允许出声
+
+// 手机（尤其 iPhone）网页声音很挑：必须在用户「点击的那一刻」解锁。
+// ①播一个空音让 AudioContext 真正启动；②循环播一段静音，尽量绕过 iPhone 静音开关。
+function unlockAudio(){
+  try{
+    if(!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+    if(audio.state === 'suspended') audio.resume();
+    const b = audio.createBuffer(1, 1, 22050);
+    const s = audio.createBufferSource(); s.buffer = b;
+    s.connect(audio.destination); s.start(0);
+    if(!silentEl){
+      silentEl = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+      silentEl.loop = true;
+    }
+    silentEl.play().catch(()=>{});
+  }catch(e){}
+}
 
 function openConfirm(type){
   unlockAudio();                     // 第一次点按钮就解锁声音（手机关键）
