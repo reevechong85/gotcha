@@ -165,6 +165,7 @@
 </div>
 
 <canvas id="confetti"></canvas>
+<audio id="scream" src="scream.wav" preload="auto" playsinline></audio>
 
 <script>
 /* ============================================================
@@ -172,22 +173,15 @@
    底线不变：输入框什么都不收集、不发送（全篇没有任何提交逻辑）
    ============================================================ */
 
-let audio = null, silentEl = null;   // 在用户点击（手势）时创建/解锁，浏览器（尤其手机）才允许出声
+const screamEl = document.getElementById('scream');   // 真实音频文件：走「媒体」通道，iPhone 静音开关也挡不住
 
-// 手机（尤其 iPhone）网页声音很挑：必须在用户「点击的那一刻」解锁。
-// ①播一个空音让 AudioContext 真正启动；②循环播一段静音，尽量绕过 iPhone 静音开关。
+// 手机（尤其 iPhone）必须在「用户点击的那一刻」先解锁音频：偷偷静音播一下再停。
 function unlockAudio(){
   try{
-    if(!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
-    if(audio.state === 'suspended') audio.resume();
-    const b = audio.createBuffer(1, 1, 22050);
-    const s = audio.createBufferSource(); s.buffer = b;
-    s.connect(audio.destination); s.start(0);
-    if(!silentEl){
-      silentEl = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
-      silentEl.loop = true;
-    }
-    silentEl.play().catch(()=>{});
+    screamEl.muted = true;
+    const p = screamEl.play();
+    if(p) p.then(() => { screamEl.pause(); screamEl.currentTime = 0; screamEl.muted = false; })
+          .catch(() => { screamEl.muted = false; });
   }catch(e){}
 }
 
@@ -232,61 +226,14 @@ function fireScare(){
   }, 2600);
 }
 
-/* ---------- 实时合成一段「人在尖叫」的吼声（不靠任何外部音频文件）---------- */
+/* ---------- 播放尖叫音频文件（走「媒体」通道，手机也能响）---------- */
 function playScream(){
-  if(!audio) return;
-  const t0 = audio.currentTime, dur = 2.7;   // 拉长到 2.7 秒
-
-  const master = audio.createGain();
-  master.gain.setValueAtTime(0.0001, t0);
-  master.gain.exponentialRampToValueAtTime(1.0, t0 + 0.03);   // 瞬间炸响
-  master.gain.setValueAtTime(1.0, t0 + dur - 0.45);
-  master.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  master.connect(audio.destination);
-
-  // 轻微过载 → "喊到破音、撕裂"的质感
-  const shaper = audio.createWaveShaper();
-  const curve = new Float32Array(256);
-  for(let i=0;i<256;i++){ const x=i/128-1; curve[i]=Math.tanh(x*3); }
-  shaper.curve = curve; shaper.connect(master);
-
-  // 共振峰：把声音塑造成人声「啊——」的元音（这是它像"人喊"的关键）
-  function formant(freq, q, gain){
-    const f = audio.createBiquadFilter();
-    f.type='bandpass'; f.frequency.value=freq; f.Q.value=q;
-    const g = audio.createGain(); g.gain.value=gain;
-    f.connect(g); g.connect(shaper);
-    return f;
-  }
-  const f1=formant(820,8,1.0), f2=formant(1180,9,0.8), f3=formant(2700,10,0.5);
-
-  // 颤音（真人喊叫时声音会抖）
-  const lfo=audio.createOscillator(); lfo.frequency.value=6.5;
-  const lfoGain=audio.createGain(); lfoGain.gain.value=40;
-  lfo.connect(lfoGain); lfo.start(t0); lfo.stop(t0+dur);
-
-  // "声带"：两条略微失谐的锯齿波 + 喊叫的音高起伏
-  [0, 8].forEach(det => {
-    const o=audio.createOscillator(); o.type='sawtooth'; o.detune.value=det;
-    o.frequency.setValueAtTime(480, t0);
-    o.frequency.linearRampToValueAtTime(960, t0+0.18);  // 猛地喊起来
-    o.frequency.linearRampToValueAtTime(760, t0+1.4);   // 中段起伏
-    o.frequency.linearRampToValueAtTime(880, t0+2.1);
-    o.frequency.linearRampToValueAtTime(400, t0+dur);   // 尾段下滑（喊到没气）
-    lfoGain.connect(o.frequency);
-    o.connect(f1); o.connect(f2); o.connect(f3);
-    o.start(t0); o.stop(t0+dur);
-  });
-
-  // 嘶哑的气声
-  const buf=audio.createBuffer(1, audio.sampleRate*dur, audio.sampleRate);
-  const d=buf.getChannelData(0);
-  for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
-  const noise=audio.createBufferSource(); noise.buffer=buf;
-  const nbp=audio.createBiquadFilter(); nbp.type='bandpass'; nbp.frequency.value=1500; nbp.Q.value=0.7;
-  const ng=audio.createGain(); ng.gain.value=0.22;
-  noise.connect(nbp); nbp.connect(ng); ng.connect(shaper);
-  noise.start(t0); noise.stop(t0+dur);
+  try{
+    screamEl.muted = false;
+    screamEl.volume = 1;
+    screamEl.currentTime = 0;
+    screamEl.play().catch(()=>{});
+  }catch(e){}
 }
 
 /* ---------- 彩屑庆祝 ---------- */
